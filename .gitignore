@@ -1,0 +1,4 @@
+*.pdf
+LandingPage.jsx
+.claude/
+node_modules/

@@ -447,29 +447,30 @@
     </div>
     <form id="contact-form" onsubmit="submitContact(event)"
       style="display:flex;flex-direction:column;gap:1.25rem;">
+      <input type="hidden" name="_subject" value="Quero saber mais sobre os Consumidores Sintéticos" />
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
         <div>
           <label style="display:block;font-size:.85rem;font-weight:500;color:#323030;margin-bottom:.5rem;">Nome *</label>
-          <input type="text" id="cf-nome" required placeholder="O seu nome"
+          <input type="text" name="nome" id="cf-nome" required placeholder="O seu nome"
             style="width:100%;padding:.75rem 1rem;font-size:1rem;font-family:Roboto,sans-serif;border:1px solid #E8E6DF;border-radius:.75rem;outline:none;box-sizing:border-box;"
             onfocus="this.style.borderColor='#112057'" onblur="this.style.borderColor='#E8E6DF'"/>
         </div>
         <div>
           <label style="display:block;font-size:.85rem;font-weight:500;color:#323030;margin-bottom:.5rem;">Empresa *</label>
-          <input type="text" id="cf-empresa" required placeholder="Nome da empresa"
+          <input type="text" name="empresa" id="cf-empresa" required placeholder="Nome da empresa"
             style="width:100%;padding:.75rem 1rem;font-size:1rem;font-family:Roboto,sans-serif;border:1px solid #E8E6DF;border-radius:.75rem;outline:none;box-sizing:border-box;"
             onfocus="this.style.borderColor='#112057'" onblur="this.style.borderColor='#E8E6DF'"/>
         </div>
       </div>
       <div>
         <label style="display:block;font-size:.85rem;font-weight:500;color:#323030;margin-bottom:.5rem;">Email *</label>
-        <input type="email" id="cf-email" required placeholder="email@empresa.com"
+        <input type="email" name="email" id="cf-email" required placeholder="email@empresa.com"
           style="width:100%;padding:.75rem 1rem;font-size:1rem;font-family:Roboto,sans-serif;border:1px solid #E8E6DF;border-radius:.75rem;outline:none;box-sizing:border-box;"
           onfocus="this.style.borderColor='#112057'" onblur="this.style.borderColor='#E8E6DF'"/>
       </div>
       <div>
         <label style="display:block;font-size:.85rem;font-weight:500;color:#323030;margin-bottom:.5rem;">Telefone</label>
-        <input type="tel" id="cf-telefone" placeholder="+351 910 000 000"
+        <input type="tel" name="telefone" id="cf-telefone" placeholder="+351 910 000 000"
           style="width:100%;padding:.75rem 1rem;font-size:1rem;font-family:Roboto,sans-serif;border:1px solid #E8E6DF;border-radius:.75rem;outline:none;box-sizing:border-box;"
           onfocus="this.style.borderColor='#112057'" onblur="this.style.borderColor='#E8E6DF'"/>
       </div>
@@ -708,20 +709,28 @@
 
   function submitContact(e) {
     e.preventDefault()
-    const nome     = document.getElementById('cf-nome').value.trim()
-    const empresa  = document.getElementById('cf-empresa').value.trim()
-    const email    = document.getElementById('cf-email').value.trim()
-    const telefone = document.getElementById('cf-telefone').value.trim()
-    const subject  = encodeURIComponent('Contacto LP — ' + nome + ' · ' + empresa)
-    const body     = encodeURIComponent(
-      'Nome: ' + nome + '\n' +
-      'Empresa: ' + empresa + '\n' +
-      'Email: ' + email + '\n' +
-      'Telefone: ' + (telefone || '—') + '\n'
-    )
-    window.location.href = 'mailto:negocios@elifeportugal.com?subject=' + subject + '&body=' + body
-    document.getElementById('contact-form').style.display = 'none'
-    document.getElementById('contact-success').style.display = 'block'
+    const form = document.getElementById('contact-form')
+    const btn  = form.querySelector('button[type="submit"]')
+    btn.disabled = true
+    btn.textContent = 'A enviar…'
+    fetch('https://formspree.io/f/mojolpvr', {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    }).then(res => {
+      if (res.ok) {
+        form.style.display = 'none'
+        document.getElementById('contact-success').style.display = 'block'
+      } else {
+        btn.disabled = false
+        btn.textContent = 'Enviar mensagem →'
+        alert('Ocorreu um erro. Tente novamente ou escreva para negocios@elifeportugal.com')
+      }
+    }).catch(() => {
+      btn.disabled = false
+      btn.textContent = 'Enviar mensagem →'
+      alert('Ocorreu um erro. Tente novamente ou escreva para negocios@elifeportugal.com')
+    })
   }
 
   function showInput() {
